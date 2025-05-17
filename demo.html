@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SCADA MQTT UI Demo</title>
+  <link rel="stylesheet" href="site.css">
+  <script type="module" src="client.mjs"></script>
+  <script type="module" src="shared-checkbox.mjs"></script>
+  <script type="module" src="shared-debug.mjs"></script>
+  <script type="module" src="shared-selectMultiple.mjs"></script>
+  <script type="module" src="shared-tabs.mjs"></script>
+  <script type="module" src="broker-telemetry.mjs"></script>
+  <script type="module" src="shared-toast.mjs"></script>
+  <script type="module" src="mode-line.mjs"></script>
+  <script type="module" src="shared-slider.mjs"></script>
+  <script type="module" src="shared-theme.mjs"></script>
+  <script type="module" src="mouse-sensor.mjs"></script>
+  <script type="module" src="hotkey-sensor.mjs"></script>
+  <script type="module" src="demo.mjs"></script>
+</head>
+<body>
+  <h1>SCADA MQTT UI Demo</h1>
+  <section>
+    <h2>Checkbox</h2>
+    <shared-checkbox id="ck1"></shared-checkbox>
+    <label for="ck1">Checkbox 1</label>
+  </section>
+  <section>
+    <h2>Select Multiple</h2>
+    <shared-selectMultiple></shared-selectMultiple>
+  </section>
+  <section>
+    <h2>Tabs</h2>
+    <shared-tabs></shared-tabs>
+  </section>
+  <section>
+    <h2>Broker Telemetry</h2>
+    <broker-telemetry></broker-telemetry>
+  </section>
+  <section>
+    <h2>Debug Panel</h2>
+    <shared-debug></shared-debug>
+  </section>
+  <section>
+    <h2>Toast</h2>
+    <shared-toast></shared-toast>
+    <button id="toastBtn">Trigger Toast</button>
+  </section>
+  <section>
+    <h2>Mode Line</h2>
+    <mode-line></mode-line>
+  </section>
+  <section>
+    <h2>Slider</h2>
+    <shared-slider id="slider1"></shared-slider>
+  </section>
+  <section>
+    <h2>Theme Selector</h2>
+    <shared-theme></shared-theme>
+  </section>
+  <section>
+    <h2>Mouse Sensor</h2>
+    <mouse-sensor></mouse-sensor>
+  </section>
+  <section>
+    <h2>Hotkey Sensor (Enter)</h2>
+    <hotkey-sensor combo="Enter"></hotkey-sensor>
+  </section>
+</body>
+</html>
