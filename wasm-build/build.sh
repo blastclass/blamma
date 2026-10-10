@@ -46,8 +46,9 @@ EXPORTS=$(sed 's|^|-Wl,--export=|' "$HERE/exports.txt")
 # sched_yield and pthread branch, which the shipped module's imports
 # show it took (the thread shims in wasm_threads.c stand in for pthread).
 COMMON_C="-target wasm32-wasi -mexec-model=reactor
-  -msimd128 -matomics -mbulk-memory -D__EMSCRIPTEN__
-  -DWASM_THREADS -D__SSE__=1 -D__SSE2__=1
+  -mcpu=generic+simd128+bulk_memory+atomics -D__EMSCRIPTEN__
+  -std=c17 -D_POSIX_C_SOURCE=200809L -ffp-contract=off -w
+  -DBROWSER -DWASM_THREADS -D__SSE__ -D__SSE2__
   -Dpthread_mutex_init=wt_init -Dpthread_mutex_destroy=wt_destroy
   -Dpthread_mutex_lock=wt_lock -Dpthread_mutex_unlock=wt_unlock
   -I$COMPAT -I$SRC/box3d/include -I$SRC/box3d/src"
@@ -91,12 +92,12 @@ debug)
   ;;
 release)
   mkdir -p "$OUT"
-  # -g0 both sides; hidden visibility so only the listed exports reach
+  # -O2 as build_mt.sh ships; -g0 both sides; hidden visibility so only the listed exports reach
   # the export section; --strip-all drops the name section and, with
   # Zig's wasm-ld, the producers and target_features sections. The
   # python pass after is belt and braces: it removes every custom
   # section whatever the linker left, so the audit can be trusted.
-  $ZIG cc $COMMON_C -O3 -g0 -DNDEBUG -fvisibility=hidden ${LTO:+-flto} \
+  $ZIG cc $COMMON_C -O2 -g0 -DNDEBUG -fvisibility=hidden ${LTO:+-flto} \
     $COMMON_LD ${LTO:+-flto} -Wl,--strip-all \
     $FILES -o "$OUT/ocean.wasm"
   "$PY" -I "$HERE/wasm-strip-custom.py" "$OUT/ocean.wasm"

@@ -60,21 +60,28 @@ back from the module and checked by rebuilding it:
 - Export list and import list of both rebuilds are equal to the
   shipped module's, name for name.
 
-Three things are still guesses, each marked in `build.sh`:
+The real build script turned out to be published with the source, at
+`/physics/src/build_mt.sh`, with `make.sh`, `map.py` and the `emcompat/`
+headers beside it. It settled what had been guessed: `-O2`, `NDEBUG`,
+`-std=c17`, `-ffp-contract=off`, `-DBROWSER`, and Emscripten's SSE
+headers unchanged. `build.sh` now uses those flags. Rebuilt with them
+under Zig 0.17.0, the stripped module is 596,781 bytes against the
+shipped 588,359 (the shipped one less its map section) and steps to
+the same hash; the byte difference is the compiler release.
 
-1. The `-O` level of the shipped build. Release here uses `-O3`.
-2. Whether the shipped build had `NDEBUG`. Release here does; debug
-   defines `B3_ENABLE_ASSERT` instead. `ocean.c`'s own `CHECK` is
-   always on.
-3. The SSE2-on-wasm shim. Box3D's `core.h` picks the SSE2 path for
-   wasm when `__EMSCRIPTEN__` is defined, and `simd_sse2.h` then
-   includes `<emmintrin.h>`. Zig's clang refuses that header on
-   wasm, so the build machine supplies its own. `compat/` here holds
-   Emscripten's `xmmintrin.h` and `emmintrin.h` with one change: `__m128`
-   is a clang `ext_vector_type(4)` instead of a plain vector, because
-   `contact_solver_wide.inl` reads `.x` off a lane type and nothing
-   else lets that compile. Whatever shim the real build uses must do
-   the same.
+One thing differs on purpose. Box3D's `contact_solver_wide.inl` reads
+`.x` off a `b3FloatW4`, which `simd_sse2.h` types as `__m128`, which
+Emscripten's `xmmintrin.h` types as a plain `__f32x4` vector. Zig 0.17's
+clang 22 rejects that read; the machine that built the shipped module
+ran Zig 0.16. `compat/xmmintrin.h` here types `__m128` as a clang
+`ext_vector_type(4)` instead, which both compilers accept. Moving the
+site's build to 0.17 needs that one line in `emcompat/xmmintrin.h`.
+
+`map.py` is the better source-map maker for this project: it builds the
+module twice, `-g` and `-s`, and maps the stripped one by matching
+function bodies, so the served wasm is the stripped build byte for byte
+plus one custom section. The debug target here keeps DWARF in the
+module instead, which is the point of it; the two are complementary.
 
 `-D__EMSCRIPTEN__` is not an emcc build. It is the switch that puts
 Box3D's `core.h` on `B3_PLATFORM_WASM` and its `timer.c` on the
